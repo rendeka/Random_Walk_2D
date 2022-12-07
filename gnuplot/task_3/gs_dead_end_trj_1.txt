@@ -1,0 +1,28 @@
+reset
+cd 'C:\dev\Simulations\RandomWalk2D\gnuplot\task_3'
+set terminal pngcairo size 720, 640
+set out "fig_walk.png"
+set encoding utf8
+
+#data = 'data_dead_end_trj_long.dat'
+data = 'data_dead_end_trj_1.dat'
+
+set autoscale
+set size ratio -1
+
+set xlabel "x"
+set ylabel "y"
+
+set grid
+
+set title "Random walk without collisions in 2D"
+set key outside center bottom
+
+
+stats data
+N = floor(STATS_records)
+    
+p   data u 1:2 title sprintf("Number of steps: %d", N-1) w l lt rgb 'dark-violet' lw 5, \
+    data every (N-1) w p pt 5 ps .9 lc rgb "red" notitle
+
+    

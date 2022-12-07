@@ -1,0 +1,98 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Wenneker Assignment
+% LaTeX Template
+% Version 2.0 (12/1/2019)
+%
+% This template originates from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@LaTeXTemplates.com)
+% Frits Wenneker
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt]{scrartcl} % Font size
+
+\input{structure.tex} % Include the file specifying the document structure and custom commands
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\title{	
+	\normalfont\normalsize
+	\textsc{Faculty of Mathematics and Physics}\\ % Your university, school and/or department name(s)
+	\vspace{25pt} % Whitespace
+	\rule{\linewidth}{0.5pt}\\ % Thin top horizontal rule
+	\vspace{20pt} % Whitespace
+	{\huge Random walk in 2D square grid}\\ % The assignment title
+	\vspace{12pt} % Whitespace
+	\rule{\linewidth}{2pt}\\ % Thick bottom horizontal rule
+	\vspace{12pt} % Whitespace
+}
+
+\author{\LARGE Andrej Rendek} % Your name
+
+\date{\normalsize\today} % Today's date (\today) or a custom date
+
+\begin{document}
+
+\maketitle % Print the title
+
+\section{Simple walk}
+
+This is a walk, where all direction are equally likely at each point of the walk. We have simulated $N = 1600$ for a length of the walk $n = 2^x$, where $x \in \{2, \ 3, \dots, \ 16, \ 17\}$. For $N = 1600$ we have standard deviation $\sigma \sim \dfrac{1}{\sqrt{N}} = 0.025$ for each simulated value. We have fitted results of the simulation in the form:
+
+\begin{equation*}
+	\ln \left[R(n) \right] = \ln(c) + \alpha \ln(n),
+\end{equation*}
+where $R(n)$ is an Euclidean distance between the origin and the final position of the walk, $n$ is a length of the walk, and $c$ and $\alpha$ are fitting parameters. The dependence came out linear as expected, see \ref{fig:simple-fit}, fitted parameters are:
+
+\begin{align}
+	\alpha &= 0.507 \pm 0.004, \\
+	c &= 0.884 \pm 0.025
+\end{align}
+
+\begin{figure}[h] 
+	\centering
+	\includegraphics[width=0.8\textwidth]{fig_walk_length.png} 
+	\caption{Euclidean distance for simple walk.}
+	\label{fig:simple-fit}
+\end{figure}
+
+\section{Non-returning walk}
+
+For this walk, we have repeated the same procedure as in simple walk. 
+
+\begin{align}
+	\alpha &= 0.530 \pm 0.004, \\
+	c &= 1.012 \pm 0.029
+\end{align}
+
+\begin{figure}[h] 
+	\centering
+	\includegraphics[width=0.8\textwidth]{fig_walk2_length.png} 
+	\caption{Euclidean distance for non-returning walk.}
+\end{figure}
+
+\section{Non-crossing walk}
+
+We simulated $N = 40000$ random walks with the length set to $n = 10000$, but all walks were terminated at most after $600$ steps. Here is an example of one of the longest walks \ref{fig:non-crossing}. The average length of this walk altered between $70-71$ as expected.
+
+\begin{figure}[h] 
+	\centering
+	\includegraphics[width=0.8\textwidth]{fig_walk_long.png} 
+	\caption{Example of non-crossing random walk.}
+	\label{fig:non-crossing}
+\end{figure}
+
+
+\end{document}

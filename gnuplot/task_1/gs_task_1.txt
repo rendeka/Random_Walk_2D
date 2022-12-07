@@ -1,0 +1,27 @@
+reset
+cd 'C:\dev\Simulations\RandomWalk2D\gnuplot\task_1'
+set terminal pngcairo size 720, 640 font "Helvetica,18"
+set out "fig_walk_length.png"
+set encoding utf8
+
+data = '..\..\output\task_1\log_length_of_trj_evolution.dat'
+
+set autoscale
+
+set ylabel "ln[R(n)]"
+set xlabel "ln(n)"
+
+c = 1
+a = 0.5
+
+f(x) = log(c) + a * x
+fit f(x) data u 1:2 via a, c
+
+set key box inside left top
+
+set grid
+set title "Dependence of Euclidean distance on \n the length of a simple random walk"
+ 
+p f(x) t 'fit' lt rgb 'dark-violet' lw 2 dt 2, data u 1:2 t 'simulated values' lt rgb 'black' pt 4
+
+    
