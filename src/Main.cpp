@@ -7,7 +7,7 @@
 #include "random_generators.h"
 #include "func_declaration.h"
 
-int main()
+int main() 
 {
 	int trajectory[n][2] = { 0 };
 	int step = 1;
@@ -77,7 +77,8 @@ int main()
 			avgWalkLength += walkLength[i];
 		avgWalkLength = avgWalkLength / N;
 		std::cout << avgWalkLength << std::endl;
-	*/		
+	*/
+		std::cout << "Task 1 completed" << std::endl;
 	}
 
 	if (task == 2) // not returning walk
@@ -160,6 +161,7 @@ int main()
 
 		std::cout << avgWalkLength << std::endl;
 	*/
+		std::cout << "Task 2 completed" << std::endl;
 	}
 
 	if (task == 3) // not crossing walk
@@ -220,7 +222,7 @@ int main()
 			avgNumStepDeadEnd += numOfSteps[i];
 		avgNumStepDeadEnd = avgNumStepDeadEnd / collisions;
 
-		std::cout << avgNumStepDeadEnd << std::endl;
+		std::cout << "The average number of steps for non-crossing walk is: " << avgNumStepDeadEnd << std::endl;
 	}
 }
 
