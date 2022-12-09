@@ -9,33 +9,35 @@
 
 int main() 
 {
-	int trajectory[n][2] = { 0 };
-	int step = 1;
 	bool dirOptions[4] = { true, true, true, true }; // each element of this array represents a sigle direction, if the value is true then is the corresponding direction allowed
+	int steps[4][2] = { {0, 1} ,{1, 0}, {0, -1}, {-1, 0} };
 	double walkLength[N] = { 0 }; // here we store the length of each walk
 	double avgWalkLength = 0; // here we store the final Euclidean distance from the origin
+	int dir; // current direction
 
 	if (task == 1) // simple walk
 	{
-	// /* // simple walk for multiple walk lengths
+		// /* // simple walk for multiple walk lengths
+		int pos[2] = { 0 };
 		int nn;
 		double nnResults[powers] = { 0 };
 		int nnIdx = 0;
 
-		for (int j = 0; j < powers; j++) // we probably should create subsets of trajectory with the length of: (nn += nIncrease) but we would need to use dynamic memory for that.. maybe later
+		for (int j = 0; j < powers; j++)
 		{
 			nn = std::pow(2, j + minPowerOfTwo);
 
 			omp_set_num_threads(N_THREAD);
-			#pragma omp parallel for
+			#pragma omp parallel for firstprivate(pos)
 			for (int iPar = 0; iPar < N; iPar++)
 			{
 				for (int i = 0; i < nn - 1; i++)
 				{
-					int dir = next_direction(dirOptions);
-					make_step(trajectory, dir, i, step);
+					dir = next_direction(dirOptions);
+					pos[0] += steps[dir][0];
+					pos[1] += steps[dir][1];
 				}
-				walkLength[iPar] = norm(trajectory[nn - 1][0], trajectory[nn - 1][1]);
+				walkLength[iPar] = norm(pos[0], pos[1]);
 			}
 			for (int i = 0; i < N; i++)
 			{
@@ -44,47 +46,28 @@ int main()
 			}
 			avgWalkLength = avgWalkLength / N;
 
-			for (int i = 0; i < nn; i++)
-			{
-				trajectory[i][0] = 0;
-				trajectory[i][1] = 0;
-			}
+			pos[0] = 0;
+			pos[1] = 0;
 			nnResults[nnIdx] = avgWalkLength;
 			nnIdx++;
 		}
 		std::ofstream myfile;
 		std::string fileName = "output/task_1/log_length_of_trj_evolution.dat";
 		myfile.open(fileName);
-		
+
 		for (int j = 0; j < powers; j++)
 			myfile << std::to_string(std::log(2) * ((long long int)j + minPowerOfTwo)) + "\t" + std::to_string(std::log(nnResults[j])) + "\n";
 
 		myfile.close();
-	// */
-
-	/* // single simple walk
-		#pragma omp parallel for
-		for (int iPar = 0; iPar < N; iPar++)
-		{
-			for (int i = 0; i < n - 1; i++)
-			{
-				int dir = next_direction(dirOptions);
-				make_step(trajectory, dir, i, step);
-			}
-			walkLength[iPar] = norm(trajectory[n - 1][0], trajectory[n - 1][1]);
-		}
-		for (int i = 0; i < N; i++)
-			avgWalkLength += walkLength[i];
-		avgWalkLength = avgWalkLength / N;
-		std::cout << avgWalkLength << std::endl;
-	*/
 		std::cout << "Task 1 completed" << std::endl;
 	}
 
+	
+
 	if (task == 2) // not returning walk
 	{
-		int dir;
-		int prevDir = -1;
+		int pos[2] = { 0 };
+		int prevDir = next_direction(dirOptions);
 		int nn;
 		double nnResults[powers] = { 0 };
 		int nnIdx = 0;
@@ -99,17 +82,16 @@ int main()
 			{
 				for (int i = 0; i < nn - 1; i++)
 				{
-					if (prevDir != -1)
-						dirOptions[prevDir] = false;
-
+					dirOptions[prevDir] = false;
 					dir = next_direction(dirOptions);
-					make_step(trajectory, dir, i, step);
+					pos[0] += steps[dir][0];
+					pos[1] += steps[dir][1];
 
 					for (int q = 0; q < 4; q++)
 						dirOptions[q] = true;
 
 					prevDir = (dir + 2) % 4;
-					walkLength[iPar] = norm(trajectory[nn - 1][0], trajectory[nn - 1][1]);
+					walkLength[iPar] = norm(pos[0], pos[1]);
 				}
 			}
 			for (int i = 0; i < N; i++)
@@ -119,11 +101,8 @@ int main()
 			}
 			avgWalkLength = avgWalkLength / N;
 
-			for (int i = 0; i < nn; i++)
-			{
-				trajectory[i][0] = 0;
-				trajectory[i][1] = 0;
-			}
+			pos[0] = 0;
+			pos[1] = 0;
 			nnResults[nnIdx] = avgWalkLength;
 			nnIdx++;
 		}
@@ -166,6 +145,7 @@ int main()
 
 	if (task == 3) // not crossing walk
 	{
+		int trajectory[n][2] = { 0 };
 		int numOfSteps[N] = { 0 };
 		double avgNumStepDeadEnd = 0;
 		int numOfCollisions[N_THREAD] = { 0 };
@@ -189,7 +169,7 @@ int main()
 					dirOptions[q] = true; // all directions are now possible
 				dirOptions[prevDir] = false; // we already disallow going immediately back
 
-				noCollision = step_dont_cross(trajectory, iPtr, step, dirOptions, prevDirPtr); 
+				noCollision = step_dont_cross(trajectory, iPtr, dirOptions, prevDirPtr, steps); 
 				i++;
 			}
 			if (!noCollision)
@@ -269,30 +249,7 @@ int next_direction(bool dirOpts[4]) // when 4 possible directions then we want t
 
 }
 
-void make_step(int trj[n][2], int dir, int i, int step) // makes step in the given direction
-{
-	switch (dir)
-	{
-	case 0:
-		*(*(trj + i + 1) + 0) = *(*(trj + i) + 0);
-		*(*(trj + i + 1) + 1) = *(*(trj + i) + 1) + step;
-		break;
-	case 1:
-		*(*(trj + i + 1) + 0) = *(*(trj + i) + 0) + step;
-		*(*(trj + i + 1) + 1) = *(*(trj + i) + 1);
-		break;
-	case 2:
-		*(*(trj + i + 1) + 0) = *(*(trj + i) + 0);
-		*(*(trj + i + 1) + 1) = *(*(trj + i) + 1) - step;
-		break;
-	case 3:
-		*(*(trj + i + 1) + 0) = *(*(trj + i) + 0) - step;
-		*(*(trj + i + 1) + 1) = *(*(trj + i) + 1);
-		break;
-	}
-}
-
-bool step_dont_cross(int trj[n][2], int* iPtr, int step, bool dirOpts[4], int* prevDirPtr)
+bool step_dont_cross(int trj[n][2], int* iPtr, bool dirOpts[4], int* prevDirPtr, int steps[4][2])
 {
 	int dir = 0;
 	bool passed = true;
@@ -300,7 +257,8 @@ bool step_dont_cross(int trj[n][2], int* iPtr, int step, bool dirOpts[4], int* p
 	{
 		passed = false; // need to exit this while loop if we find the next viable step
 		dir = next_direction(dirOpts);
-		make_step(trj, dir, *iPtr, step);
+		*(*(trj + *iPtr + 1) + 0) = *(*(trj + *iPtr) + 0) + *(*(steps + dir) + 0);
+		*(*(trj + *iPtr + 1) + 1) = *(*(trj + *iPtr) + 1) + *(*(steps + dir) + 1);
 
 		for (int k = 0; k < *iPtr + 1; k++)
 		{
