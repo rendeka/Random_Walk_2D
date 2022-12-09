@@ -17,7 +17,6 @@ int main()
 
 	if (task == 1) // simple walk
 	{
-		// /* // simple walk for multiple walk lengths
 		int pos[2] = { 0 };
 		int nn;
 		double nnResults[powers] = { 0 };
@@ -62,12 +61,10 @@ int main()
 		std::cout << "Task 1 completed" << std::endl;
 	}
 
-	
-
 	if (task == 2) // not returning walk
 	{
 		int pos[2] = { 0 };
-		int prevDir = next_direction(dirOptions);
+		int prevDir = next_direction(dirOptions); // we will be tracking the previous direction
 		int nn;
 		double nnResults[powers] = { 0 };
 		int nnIdx = 0;
@@ -77,7 +74,7 @@ int main()
 			nn = std::pow(2, j + minPowerOfTwo);
 
 			omp_set_num_threads(N_THREAD);
-			#pragma omp parallel for
+			#pragma omp parallel for firstprivate(pos, dirOptions)
 			for (int iPar = 0; iPar < N; iPar++)
 			{
 				for (int i = 0; i < nn - 1; i++)
@@ -114,32 +111,6 @@ int main()
 			myfile << std::to_string(std::log(2) * ((long long int)j + minPowerOfTwo)) + "\t" + std::to_string(std::log(nnResults[j])) + "\n";
 
 		myfile.close();
-
-	/* single not returning walk
-			#pragma omp parallel for
-		for (int iPar = 0; iPar < N; iPar++)
-		{
-			for (int i = 0; i < n - 1; i++)
-			{
-				if (prevDir != -1)
-					dirOptions[prevDir] = false;
-
-				dir = next_direction(dirOptions);
-				make_step(trajectory, dir, i, step);
-
-				for (int q = 0; q < 4; q++)
-					dirOptions[q] = true;
-
-				prevDir = (dir + 2) % 4;
-				walkLength[iPar] = norm(trajectory[n - 1][0], trajectory[n - 1][1]);
-			}
-		}
-		for (int i = 0; i < N; i++)
-			avgWalkLength += walkLength[i];
-		avgWalkLength = avgWalkLength / N;
-
-		std::cout << avgWalkLength << std::endl;
-	*/
 		std::cout << "Task 2 completed" << std::endl;
 	}
 
@@ -150,7 +121,7 @@ int main()
 		double avgNumStepDeadEnd = 0;
 		int numOfCollisions[N_THREAD] = { 0 };
 		int collisions = 0;
-		bool saveCollisionTrajectory = true; // choose whether you want to save trajectories with dead end into files
+		bool saveCollisionTrajectory = false; // choose whether you want to save trajectories with dead end into files
 
 		omp_set_num_threads(N_THREAD);
 		#pragma omp parallel for firstprivate(trajectory, dirOptions) 
@@ -168,7 +139,6 @@ int main()
 				for (int q = 0; q < 4; q++)
 					dirOptions[q] = true; // all directions are now possible
 				dirOptions[prevDir] = false; // we already disallow going immediately back
-
 				noCollision = step_dont_cross(trajectory, iPtr, dirOptions, prevDirPtr, steps); 
 				i++;
 			}
@@ -218,10 +188,9 @@ int next_direction(bool dirOpts[4]) // when 4 possible directions then we want t
 
 	else
 	{
-		int sortedOpts[4]; // we sort the directions such that possible ones are at the beggining of this list
-		int j = 0;
+		int sortedOpts[4]; // we sort the directions such that possible ones are at the beginning of this list
 		int k = 0;
-		while (j < 4)
+		for(int j = 0; j < 4; j++)
 		{
 			if (dirOpts[j])
 				sortedOpts[j - k] = j;
@@ -230,7 +199,6 @@ int next_direction(bool dirOpts[4]) // when 4 possible directions then we want t
 				sortedOpts[3 - k] = j;
 				k++;
 			}
-			j++;
 		}
 
 		if (dirLen == 3)
